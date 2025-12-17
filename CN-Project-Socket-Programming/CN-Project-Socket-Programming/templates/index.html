@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER LAB - Network Protocol Tester</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@300;400;600&display=swap');
+
+        :root {
+            --hacker-green: #00ff00;
+            --matrix-green: #00cc00;
+            --cyber-blue: #0088ff;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #050505;
+            --panel-bg: #111111;
+            --glow-green: rgba(0, 255, 0, 0.3);
+            --glow-blue: rgba(0, 136, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background-color: var(--dark-bg);
+            color: var(--hacker-green);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 136, 255, 0.05) 0%, transparent 20%);
+            position: relative;
+        }
+
+        /* Matrix rain effect */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        /* Scan line effect */
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to bottom, transparent, var(--hacker-green), transparent);
+            opacity: 0.1;
+            animation: scan 4s linear infinite;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* Header styles */
+        .header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--matrix-green);
+            box-shadow: 0 0 30px var(--glow-green);
+            background-color: rgba(10, 10, 10, 0.9);
+            position: relative;
+            z-index: 10;
+            animation: headerGlow 3s infinite alternate;
+        }
+
+        @keyframes headerGlow {
+            0% { box-shadow: 0 0 20px var(--glow-green); }
+            100% { box-shadow: 0 0 40px var(--glow-green); }
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--hacker-green), var(--cyber-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px var(--glow-green);
+            animation: titlePulse 2s infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            0% { text-shadow: 0 0 10px var(--glow-green); }
+            100% { text-shadow: 0 0 25px var(--glow-green); }
+        }
+
+        .subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: var(--cyber-blue);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .group-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .group-info span {
+            background-color: rgba(0, 255, 0, 0.1);
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid var(--matrix-green);
+            font-size: 0.9rem;
+            animation: infoPulse 4s infinite;
+        }
+
+        @keyframes infoPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Protocol selector */
+        .protocol-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .protocol-btn {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--panel-bg);
+            color: var(--hacker-green);
+            border: 2px solid var(--matrix-green);
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            letter-spacing: 1px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .protocol-btn i {
+            font-size: 1.2rem;
+        }
+
+        .protocol-btn:hover {
+            background-color: rgba(0, 255, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .protocol-btn.active {
+            background-color: rgba(0, 255, 0, 0.15);
+            border-color: var(--hacker-green);
+            box-shadow: 0 0 15px var(--glow-green);
+            color: var(--hacker-green);
+            animation: activeBtn 1.5s infinite alternate;
+        }
+
+        @keyframes activeBtn {
+            0% { box-shadow: 0 0 10px var(--glow-green); }
+            100% { box-shadow: 0 0 20px var(--glow-green); }
+        }
+
+        /* Main content area */
+        .main-content {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            margin: 0 auto 20px;
+            max-width: 1400px;
+        }
+
+        /* Left panel - Logs */
+        .logs-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Right panel - File management */
+        .file-section {
+            width: 350px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--matrix-green);
+            border-radius: 12px;
+            padding: 20px;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--matrix-green);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            height: 300px;
+            transition: transform 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-3px);
+        }
+
+        .panel-header {
+            background-color: rgba(0, 30, 0, 0.7);
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--matrix-green);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            padding: 15px;
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .panel-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: rgba(0, 30, 0, 0.3);
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: var(--matrix-green);
+            border-radius: 4px;
+        }
+
+        .log-line {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(0, 255, 0, 0.2);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .log-line::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--cyber-blue);
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* File list */
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background-color: rgba(0, 30, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .file-name {
+            color: var(--hacker-green);
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .file-details {
+            color: var(--cyber-blue);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .file-action-btn {
+            background-color: rgba(0, 136, 255, 0.2);
+            color: var(--cyber-blue);
+            border: 1px solid var(--cyber-blue);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .file-action-btn:hover {
+            background-color: rgba(0, 136, 255, 0.4);
+        }
+
+        .file-action-btn.delete {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .file-action-btn.delete:hover {
+            background-color: rgba(255, 0, 0, 0.4);
+        }
+
+        /* Input area */
+        .input-area {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .message-input-container {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--matrix-green);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: var(--hacker-green);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            box-shadow: 0 0 15px var(--glow-green);
+            border-color: var(--hacker-green);
+        }
+
+        .message-input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        .action-btn {
+            font-family: 'Orbitron', sans-serif;
+            background-color: rgba(0, 136, 255, 0.2);
+            color: var(--cyber-blue);
+            border: 2px solid var(--cyber-blue);
+            padding: 12px 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background-color: rgba(0, 136, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 136, 255, 0.3);
+        }
+
+        .action-btn.send {
+            background-color: rgba(0, 255, 0, 0.1);
+            color: var(--hacker-green);
+            border-color: var(--matrix-green);
+        }
+
+        .action-btn.send:hover {
+            background-color: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .file-transfer-area {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-input {
+            flex-grow: 1;
+            background-color: var(--panel-bg);
+            border: 2px dashed var(--matrix-green);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--hacker-green);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+            background-color: rgba(0, 30, 0, 0.3);
+            border-style: solid;
+        }
+
+        /* Status bar */
+        .status-bar {
+            max-width: 900px;
+            margin: 15px auto;
+            padding: 10px;
+            background-color: rgba(0, 30, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            animation: statusPulse 4s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { border-color: rgba(0, 255, 0, 0.3); }
+            50% { border-color: rgba(0, 255, 0, 0.7); }
+        }
+
+        /* Connection indicators */
+        .connection-status {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff4444;
+            animation: pulseRed 2s infinite;
+        }
+
+        .status-dot.active {
+            background-color: #00ff00;
+            animation: pulseGreen 1s infinite;
+            box-shadow: 0 0 8px #00ff00;
+        }
+
+        @keyframes pulseGreen {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulseRed {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Terminal typing effect */
+        .typing {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--hacker-green);
+            animation: typing 3.5s steps(40, end), blink 1s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(0, 255, 0, 0.2);
+            color: rgba(0, 255, 0, 0.7);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .file-section {
+                width: 100%;
+            }
+            
+            .panel {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .protocol-btn {
+                padding: 10px;
+                min-width: 120px;
+                font-size: 0.8rem;
+            }
+            
+            .message-input-container, .file-transfer-area {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix rain background -->
+    <canvas id="matrix-bg"></canvas>
+    
+    <!-- Scanning line effect -->
+    <div class="scan-line"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1 class="title">CYBER LAB</h1>
+        <p class="subtitle">NETWORK PROTOCOL TESTER</p>
+        <div class="group-info">
+            <span><i class="fas fa-users"></i> Group: CYBERCELL</span>
+            <span><i class="fas fa-hashtag"></i> ID: 01</span>
+        </div>
+        
+        <!-- Connection status indicators -->
+        <div class="connection-status">
+            <div class="status-indicator">
+                <div class="status-dot" id="tcp-status"></div>
+                <span>TCP</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="udp-status"></div>
+                <span>UDP</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="file-status"></div>
+                <span>FILE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <span id="status-text" class="typing">[SYSTEM READY] Select a protocol to begin network testing...</span>
+    </div>
+
+    <!-- Protocol selector -->
+    <div class="protocol-selector">
+        <button class="protocol-btn active" onclick="start('tcp')" id="tcp-btn">
+            <i class="fas fa-exchange-alt"></i>
+            <span>TCP PROTOCOL</span>
+            <small>Reliable Connection</small>
+        </button>
+        
+        <button class="protocol-btn" onclick="start('udp')" id="udp-btn">
+            <i class="fas fa-bolt"></i>
+            <span>UDP PROTOCOL</span>
+            <small>Fast Connectionless</small>
+        </button>
+        
+        <button class="protocol-btn" onclick="start('file')" id="file-btn">
+            <i class="fas fa-file-export"></i>
+            <span>FILE TRANSFER</span>
+            <small>Binary Data Transfer</small>
+        </button>
+    </div>
+
+    <!-- Main content area -->
+    <div class="main-content">
+        <!-- Logs section -->
+        <div class="logs-section">
+            <div class="panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-server"></i> SERVER LOG</span>
+                    <span id="server-count">0 entries</span>
+                </div>
+                <div class="panel-content" id="server-log">
+                    <div class="log-line">[SYSTEM] Server initialized</div>
+                    <div class="log-line">[INFO] Waiting for protocol selection...</div>
+                    <div class="log-line">[STATUS] All systems operational</div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-terminal"></i> CLIENT TERMINAL</span>
+                    <span id="client-count">0 entries</span>
+                </div>
+                <div class="panel-content" id="client-log">
+                    <div class="log-line">[SYSTEM] Client interface ready</div>
+                    <div class="log-line">[USER] Session established</div>
+                    <div class="log-line">[HELP] Select a protocol to begin</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File management section -->
+        <div class="file-section">
+            <div class="panel-header">
+                <span><i class="fas fa-folder-open"></i> RECEIVED FILES</span>
+                <button onclick="refreshFileList()" style="background:none; border:none; color:var(--cyber-blue); cursor:pointer;">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="panel-content">
+                <div id="file-list-container">
+                    <div class="log-line">[FILE] Files will appear here after transfer</div>
+                    <div class="log-line">[INFO] Click refresh to update list</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+        <div class="message-input-container">
+            <input type="text" class="message-input" id="msg" placeholder="Type message or command here..." onkeypress="if(event.key==='Enter') send()">
+            <button class="action-btn send" onclick="send()">
+                <i class="fas fa-paper-plane"></i>
+                SEND
+            </button>
+        </div>
+        
+        <div class="file-transfer-area">
+            <input type="file" class="file-input" id="fileInput">
+            <button class="action-btn" onclick="upload()">
+                <i class="fas fa-upload"></i>
+                UPLOAD FILE
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>CYBER LAB NETWORK TESTING SUITE | COMPUTER NETWORKS PROJECT</p>
+        <p id="file-path">Files saved to: Loading...</p>
+    </footer>
+
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const chars = "01";
+        const charArray = chars.split("");
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        
+        for(let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 5, 10, 0.04)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = "#0f0";
+            ctx.font = fontSize + "px 'Share Tech Mono'";
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+        
+        // Window resize handler
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Global variables
+        let currentProtocol = "tcp";
+        let logInterval;
+        
+        // Update status indicators
+        function updateStatus(protocol, active) {
+            const dot = document.getElementById(`${protocol}-status`);
+            const btn = document.getElementById(`${protocol}-btn`);
+            
+            if (active) {
+                dot.classList.add('active');
+                btn.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+                btn.classList.remove('active');
+            }
+        }
+        
+        // Initialize all status indicators as inactive
+        updateStatus('tcp', false);
+        updateStatus('udp', false);
+        updateStatus('file', false);
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Refresh file list
+        function refreshFileList() {
+            fetch("/list-files")
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('file-list-container');
+                    
+                    if (data.files.length === 0) {
+                        container.innerHTML = `
+                            <div class="log-line">[FILE] No files received yet</div>
+                            <div class="log-line">[INFO] Upload a file using File Transfer mode</div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '';
+                    data.files.forEach(file => {
+                        html += `
+                            <div class="file-item">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-details">
+                                    <span>${formatFileSize(file.size)}</span>
+                                    <span>${file.modified}</span>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="file-action-btn" onclick="downloadFile('${file.name}')">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                    <button class="file-action-btn delete" onclick="deleteFile('${file.name}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error fetching file list:', error);
+                });
+        }
+        
+        // Download file
+        function downloadFile(filename) {
+            window.open(`/download/${filename}`, '_blank');
+        }
+        
+        // Delete file (placeholder - you'd need to implement this on server)
+        function deleteFile(filename) {
+            if (confirm(`Are you sure you want to delete ${filename}?`)) {
+                alert(`Delete functionality would be implemented here for: ${filename}`);
+                // You would need to add a DELETE endpoint on the server
+            }
+        }
+        
+        // Protocol starter function
+        function start(protocol) {
+            currentProtocol = protocol;
+            
+            // Update UI
+            document.querySelectorAll('.protocol-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${protocol}-btn`).classList.add('active');
+            
+            // Update status indicators
+            updateStatus('tcp', protocol === 'tcp');
+            updateStatus('udp', protocol === 'udp');
+            updateStatus('file', protocol === 'file');
+            
+            // Update status text with typing effect
+            const statusText = document.getElementById('status-text');
+            statusText.classList.remove('typing');
+            
+            let message = "";
+            if (protocol === 'tcp') message = "[TCP] Establishing reliable connection...";
+            else if (protocol === 'udp') message = "[UDP] Initializing connectionless protocol...";
+            else {
+                message = "[FILE] Preparing secure file transfer channel...";
+                // Refresh file list when file mode is selected
+                setTimeout(refreshFileList, 1000);
+            }
+            
+            statusText.innerHTML = message;
+            void statusText.offsetWidth; // Trigger reflow
+            statusText.classList.add('typing');
+            
+            // Send request to server
+            fetch("/start", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({choice: protocol})
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server response:", data);
+            });
+            
+            // Start log polling
+            if(logInterval) clearInterval(logInterval);
+            logInterval = setInterval(fetchLogs, 800);
+            
+            // Focus on input
+            document.getElementById('msg').focus();
+        }
+        
+        // Send message function
+        function send() {
+            let msg = document.getElementById("msg").value.trim();
+            if(msg) {
+                // Add to client log immediately for responsiveness
+                addLogEntry('client', `[SENDING] ${msg}`);
+                
+                fetch("/send", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({msg, type: currentProtocol})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Send response:", data);
+                    document.getElementById("msg").value = "";
+                });
+            }
+        }
+        
+        // File upload function
+        function upload() {
+            let file = document.getElementById("fileInput").files[0];
+            if(!file) { 
+                addLogEntry('client', '[ERROR] No file selected!');
+                return; 
+            }
+            
+            addLogEntry('client', `[UPLOAD] Preparing: ${file.name} (${formatFileSize(file.size)})`);
+            
+            let form = new FormData();
+            form.append("file", file);
+            
+            fetch("/upload", {
+                method: "POST",
+                body: form
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    addLogEntry('client', `[ERROR] ${data.error}`);
+                } else {
+                    addLogEntry('client', `[SUCCESS] File uploaded: ${data.bytes} bytes`);
+                    document.getElementById("fileInput").value = "";
+                    
+                    // Refresh file list after upload
+                    setTimeout(refreshFileList, 1000);
+                }
+            })
+            .catch(error => {
+                addLogEntry('client', `[ERROR] Upload failed: ${error}`);
+            });
+        }
+        
+        // Fetch logs from server
+        function fetchLogs() {
+            fetch("/logs")
+                .then(response => response.json())
+                .then(data => {
+                    // Update server log
+                    const serverLog = document.getElementById('server-log');
+                    serverLog.innerHTML = '';
+                    data.server.forEach(log => {
+                        addLogEntry('server', log, false);
+                    });
+                    
+                    // Update client log
+                    const clientLog = document.getElementById('client-log');
+                    clientLog.innerHTML = '';
+                    data.client.forEach(log => {
+                        addLogEntry('client', log, false);
+                    });
+                    
+                    // Update file path in footer
+                    if (data.file_dir) {
+                        document.getElementById('file-path').textContent = `Files saved to: ${data.file_dir}`;
+                    }
+                    
+                    // Update counts
+                    document.getElementById('server-count').textContent = `${data.server.length} entries`;
+                    document.getElementById('client-count').textContent = `${data.client.length} entries`;
+                    
+                    // Auto-scroll to bottom
+                    serverLog.scrollTop = serverLog.scrollHeight;
+                    clientLog.scrollTop = clientLog.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                });
+        }
+        
+        // Helper function to add log entry with animation
+        function addLogEntry(panel, text, animate = true) {
+            const logDiv = document.getElementById(`${panel}-log`);
+            const entry = document.createElement('div');
+            entry.className = 'log-line';
+            entry.textContent = text;
+            
+            if (animate) {
+                entry.style.animation = 'fadeIn 0.5s ease';
+            }
+            
+            logDiv.appendChild(entry);
+            
+            // Limit entries to 100
+            while (logDiv.children.length > 100) {
+                logDiv.removeChild(logDiv.firstChild);
+            }
+            
+            // Auto-scroll
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            // Update count
+            const countElement = document.getElementById(`${panel}-count`);
+            countElement.textContent = `${logDiv.children.length} entries`;
+        }
+        
+        // Initialize with TCP as default
+        setTimeout(() => {
+            start('tcp');
+            // Get initial file directory
+            fetchLogs();
+        }, 500);
+    </script>
+</body>
+</html>
