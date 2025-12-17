@@ -1,4 +1,4 @@
-# 🚀 CN Socket Programming Project
+# CN Socket Programming Project
 
 A comprehensive network protocol tester with TCP, UDP, and File Transfer capabilities built using Python Socket Programming and Flask Web Interface.
 
@@ -7,38 +7,38 @@ A comprehensive network protocol tester with TCP, UDP, and File Transfer capabil
 ![Socket](https://img.shields.io/badge/Socket-Programming-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## 🌟 Features
+## Features
 
-### 🔗 **TCP Protocol**
+###  **TCP Protocol**
 - Reliable connection-oriented communication
 - Persistent connection with echo server
 - Real-time message logging
 - Connection status monitoring
 
-### ⚡ **UDP Protocol**
+### **UDP Protocol**
 - Fast connectionless communication
 - Datagram packet transmission
 - Low-latency messaging
 - Error handling for UDP quirks
 
-### 📁 **File Transfer**
+###  **File Transfer**
 - Secure binary file transfer over TCP
 - Automatic file saving with timestamps
 - File management interface
 - Download capability from web interface
 
-### 🎨 **Web Interface**
+### **Web Interface**
 - Cyberpunk/hacking-themed UI
 - Real-time dual-panel logging
 - File browser with download options
 - Responsive design for all devices
 - Matrix rain animation background
 
-## 📸 Screenshots
+## Screenshots
 
 ![Interface Preview](https://via.placeholder.com/800x400/0a0a0a/00ff00?text=Cyber+Lab+Interface)
 
-## 🛠️ Installation
+## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
